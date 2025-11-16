@@ -1,0 +1,16 @@
+fastapi
+pydantic
+joblib
+pandas
+numpy
+gensim
+sklearn
+datetime
+xgboost
+matplotlib
+warnings
+streamlit
+requests
+sys
+os
+scipy
