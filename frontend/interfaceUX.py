@@ -5,14 +5,11 @@ import requests
 import sys
 import os
 
-# Add the project root (one level up from frontend/) to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Charger les données de référence
 df_encoded_ref = pd.read_csv('../Data/voitures_preprocessed.csv', encoding='latin')
 marque_modele_map = dict(zip(df_encoded_ref['Marque_Modele'], df_encoded_ref['Marque_Modele_Encoded']))
 
-# --- CSS personnalisé avec emojis ---
 st.markdown("""
     <style>
         html, body, [class*="css"]  {
@@ -58,12 +55,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Titre ---
 st.markdown('<p class="title">Estimation du prix d\'une voiture au Maroc 🚗💰</p>', unsafe_allow_html=True)
 st.markdown('<p class="custom-header">Veuillez entrer les caractéristiques de votre voiture :</p>',
             unsafe_allow_html=True)
 
-# --- Champs avec icônes (emojis) ---
 Kilometrage = st.number_input("🔽 Kilométrage (km)", min_value=0, step=1000)
 Nombre_de_portes = st.selectbox("🚪 Nombre de portes", [2, 3, 4, 5, 6], index=0)
 Premiere_main = st.radio("🆕 Première main", ["Oui", "Non"])
@@ -77,10 +72,8 @@ Origine = st.selectbox("🌍 Origine du véhicule", ["Importée neuve", "Pas enc
 
 Marque = st.text_input("🏷️ Marque du véhicule").strip().lower()
 Modele = st.text_input("📛 Modèle du véhicule").strip().lower()
-# Equipements = st.text_area("🧰 Équipements (séparés par des virgules)").strip()
 
 
-# --- Validation ---
 def validate_inputs():
     champs = [Kilometrage, Nombre_de_portes, Premiere_main, Puissance_fiscale, Annee_de_fabriquation, Carburant,
               Boite_vitesse, Origine, Marque, Modele]
@@ -92,7 +85,6 @@ def validate_inputs():
     return True
 
 
-# --- Préparer données pour l'API ---
 def prepare_input_data():
     return {
         "Kilometrage": f"{Kilometrage}",
@@ -109,7 +101,6 @@ def prepare_input_data():
     }
 
 
-# --- Bouton ---
 if st.button('🔍 Prédire le prix'):
     if validate_inputs():
         api_url = "http://127.0.0.1:8001/predict"
@@ -124,3 +115,4 @@ if st.button('🔍 Prédire le prix'):
                 st.error(f"🚨 Erreur de l'API : {response.status_code} - {response.text}")
         except Exception as e:
             st.error(f"🔌 Erreur de connexion à l’API : {e}")
+
