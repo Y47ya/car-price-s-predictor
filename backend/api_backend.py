@@ -6,21 +6,15 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 from datetime import datetime
 
-# ------------------------------
-# FastAPI instance
-# ------------------------------
+
 app = FastAPI(title="Car Price Prediction API")
 
-# ------------------------------
-# Load trained model
-# ------------------------------
+
 predictor = joblib.load(
     "C:/Users/yahya/Desktop/Projects/PFM-ML-S3-P1/Models/price_predictor.pkl"
 )
 
-# ------------------------------
-# Load dataset for Marque_Modele mapping
-# ------------------------------
+
 df = pd.read_csv(
     "C:/Users/yahya/Desktop/Projects/PFM-ML/Data/voitures_preprocessed.csv",
     encoding="latin1"
@@ -30,7 +24,7 @@ marque_modele_map = dict(zip(df['Marque_Modele'], df['Marque_Modele_Encoded']))
 class VehicleData(BaseModel):
     Kilometrage: int
     Nombre_de_portes: int
-    Premiere_main: str       # "Oui" or "Non"
+    Premiere_main: str       
     Puissance_fiscale: int
     Carburant: str
     BoiteaV: str
@@ -39,13 +33,11 @@ class VehicleData(BaseModel):
     Modele: str
     Annee: int
 
-# ------------------------------
-# Transform input data for model
-# ------------------------------
+
 def transform_data(input_dict):
     car_infos = pd.DataFrame([input_dict])
 
-    # Premiere_main: Oui -> 1, Non -> 0
+    
     car_infos['Premiere_main'] = car_infos['Premiere_main'].map({'Oui': 1, 'Non': 0}).fillna(0)
 
     categories = [
@@ -64,13 +56,11 @@ def transform_data(input_dict):
     car_infos = car_infos.drop(['Carburant', 'BoiteaV', 'Origine'], axis=1)
     car_infos = pd.concat([car_infos, encoded_df], axis=1)
 
-    # Marque_Modèle encodée
     car_infos['Marque_Modele'] = (car_infos['Marque'].str.strip() + '_' + car_infos['Modele'].str.strip()).str.replace(
         ' ', '_')
 
     car_infos['Marque_Modele_Encoded'] = car_infos['Marque_Modele'].map(marque_modele_map)
 
-    # Calculer l'age
     car_infos['Age'] = datetime.now().year - int(car_infos['Annee'].iloc[0])
 
 
@@ -78,7 +68,6 @@ def transform_data(input_dict):
 
 
 
-    # Drop unused columns
     car_infos = car_infos.drop(["Marque", "Modele", "Marque_Modele", "Annee"], axis=1)
 
     car_infos.columns = ['Kilometrage', 'Nombre_de_portes', 'Premiere_main', 'Puissance_fiscale', 'Carburant_Diesel',
@@ -88,9 +77,7 @@ def transform_data(input_dict):
 
     return np.array(car_infos.values.flatten().tolist()).reshape(1, -1)
 
-# ------------------------------
-# Prediction route
-# ------------------------------
+
 @app.post("/predict")
 def predict_price(data: VehicleData):
     try:
@@ -98,12 +85,9 @@ def predict_price(data: VehicleData):
         prediction = predictor.predict(transformed)
         return {"predicted_price": round(float(prediction[0]), 2)}
     except Exception as e:
-        # Always return JSON even on error
         return {"error": str(e)}
 
-# ------------------------------
-# Optional test
-# ------------------------------
+
 if __name__ == "__main__":
     test_car = {
         "Kilometrage": 1300,
@@ -120,3 +104,4 @@ if __name__ == "__main__":
     data = transform_data(test_car)
     print("Transformed array shape:", data.shape)
     print("Prediction:", predictor.predict(data)[0])
+
